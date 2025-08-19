@@ -11,42 +11,87 @@
   <div id="page-wrapper">
     <div class="container">
 
-      <!-- Bloc 1 : Visuel Fixer -->
-      <div class="confession-screen-container">
-        <div id="confession-screen">
-          <video id="fixer-video" autoplay muted loop playsinline>
-            <source src="RENO5.mp4" type="video/mp4">
-          </video>
+      <!-- Onglets en haut-gauche du panneau -->
+      <div class="panel-tabs">
+        <button id="tab-terminal" class="tab active">TERMINAL</button>
+        <button id="tab-trade" class="tab">TRADE</button>
+      </div>
+
+      <!-- ======= CONNECT GATE (écran d’accueil) ======= -->
+      <div id="connect-gate">
+        <div class="connect-panel">
+          <h1>WASTELASH</h1>
+          <p>Outpost link idle. Establish connection?</p>
+          <button id="btn-connect" class="connect-btn">Connect to the Outpost</button>
         </div>
       </div>
 
-      <!-- Bloc 2 : Log terminal (colonne continue) -->
-      <div id="interaction-container">
-        <div id="interaction-content">
-          SYSTEM BOOTING...
-          WELCOME, OPERATOR. AWAITING INPUT.
+      <!-- ======= STACK TERMINAL ======= -->
+      <div id="terminal-stack" hidden>
+        <!-- Bloc 1 : Visuel Fixer (masqué au départ, pas d’autoplay) -->
+        <div class="confession-screen-container">
+          <div id="confession-screen" hidden>
+            <video id="fixer-video" muted loop playsinline>
+              <source src="RENO5.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Bloc 2 : Log terminal -->
+        <div id="interaction-container">
+          <div id="interaction-content">
+            <!-- Ce texte sera remplacé par le bootSequence -->
+          </div>
+        </div>
+
+        <!-- Bloc 3 : Terminal (login + choix) -->
+        <div class="terminal-container">
+          <div class="screen-overlay"></div>
+          <div id="terminal-screen">
+            <div id="terminal-interface">
+              <div id="terminal-output"></div>
+              <div class="input-line">
+                <span>>&nbsp;</span>
+                <input
+                  type="text"
+                  id="code-input"
+                  maxlength="5"
+                  disabled
+                  placeholder="System ready..."
+                  autocomplete="off"
+                  spellcheck="false">
+              </div>
+              <p id="feedback-line">&nbsp;</p>
+              <div id="choices"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Bloc 3 : Terminal (login + choix) -->
-      <div class="terminal-container">
-        <div class="screen-overlay"></div>
-        <div id="terminal-screen">
-          <div id="terminal-interface">
-            <div id="terminal-output">
+      <!-- ======= STACK TRADE ======= -->
+      <div id="trade-stack" hidden>
+        <div class="trade-container">
+          <div class="trade-screen">
+            <div class="trade-content">
+              <h2>The Trading Outpost</h2>
+              <p>
+                The Outpost is a waypoint in the middle of the wasteland, a trading counter where recovered things pile up.
+                Fragments, images, memories torn from ruins or scavenged on black markets. Nothing here is complete, nothing is certain:
+                every piece has circulated, changed hands, passed through places long forgotten.
+              </p>
+              <p>
+                Some call them evidence, others call them fabrications. I compile them, stack them, and sell them.
+                Truth doesn’t matter. Only the legend you take with you… and the caps you leave behind.
+              </p>
+              <p>☢️ Coming soon: catalogue, filtres, et panier ☢️</p>
             </div>
-            <div class="input-line">
-              <span>>&nbsp;</span>
-              <input type="text" id="code-input" maxlength="5" disabled placeholder="System ready..." autocomplete="off" spellcheck="false">
-            </div>
-            <p id="feedback-line">&nbsp;</p>
-            <div id="choices"></div>
           </div>
         </div>
       </div>
 
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>

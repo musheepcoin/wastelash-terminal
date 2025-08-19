@@ -1,26 +1,50 @@
-/* ===== Reset menu (garde simple) ===== */
-:root {
+/* =======================
+   WASTELASH — Terminal UI (clean)
+   ======================= */
+
+/* ---- 1) Variables (single source of truth) ---- */
+:root{
+  /* Terminal colors */
   --terminal-color: #00FF41;
   --terminal-glow: rgba(0,255,65,0.25);
 
-  /* ===== Responsive layout ===== */
-  --w:  min(900px, 92vw);
-  --h1: clamp(220px, 40vh, 480px);   /* Bloc 1 : vidéo */
-  --h2: clamp(110px, 18vh, 200px);   /* Bloc 2 : log */
-  --h3: clamp(160px, 30vh, 320px);   /* Bloc 3 : terminal */
+  /* Metal panel (independent from inner blocks) */
+  --panel-w: min(900px, 95vw);
+  --panel-h: 850px;            /* << EDIT panel height */
+  --panel-padding: 20px;
+  --panel-border: 8px;
+
+  /* Tabs (intercalaires) */
+  --tab-overhang: 18px;        /* how much the tab sticks out above panel */
+  --tab-gap: 8px;
+
+  /* Typography */
   --fs: clamp(16px, 2.4vw, 22px);
+
+  /* --- Block sizes (edit each independently) --- */
+  /* Block 1: video */
+  --block1-w: min(650px, 85vw);
+  --block1-h: 360px;
+
+  /* Block 2: log */
+  --block2-w: min(760px, 80vw);
+  --block2-h: 150px;
+
+  /* Block 3: terminal */
+  --block3-w: min(760px, 82vw);
+  --block3-h: 230px;
 }
 
-* { box-sizing: border-box; }
+/* ---- 2) Base ---- */
+*{ box-sizing: border-box; }
 
-body {
+body{
   margin: 0;
   font-family: 'VT323', monospace;
   color: var(--terminal-color);
-  background: #111 url('outpost.jpg') center/cover no-repeat;
+  background: #111 url('outpost.jpg') center/cover fixed no-repeat;
 }
-
-#page-wrapper {
+#page-wrapper{
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -28,132 +52,164 @@ body {
   padding: 20px;
 }
 
-.container {
-  position: relative;
+/* ---- 3) Metal panel (fixed size) ---- */
+.container{
+  position: relative;                   /* reference for tabs */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
 
-  width: var(--w);
-  height: auto;
+  width: var(--panel-w);
+  height: var(--panel-h);               /* fixed panel height */
+  min-height: var(--panel-h);
+  max-height: var(--panel-h);
+  overflow: auto;                       /* scroll inside when content is taller */
 
   margin: 0 auto;
-  padding: 20px;
-  border: 8px solid #333;
+  padding: var(--panel-padding);
+  border: var(--panel-border) solid #333;
   border-radius: 12px;
-  background-color: #000;                  /* base sombre */
-  background-image: url('background.png'); /* texture métal */
-  background-size: cover;
-  background-position: center;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.85), 0 0 20px #000;
+
+  background: #000 url('background.png') center/cover no-repeat;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.85), 0 0 20px #000;
 }
 
-/* ======================
-   Bloc 1 : Visuel Fixer
-   ====================== */
-.confession-screen-container {
-  width: var(--w);
-  height: var(--h1);
+/* Prevent children from shrinking (no auto-compression) */
+.container > *{ flex: 0 0 auto; }
+
+/* Allow tabs to overhang the panel */
+.container{ overflow: visible; z-index: 1; }
+
+/* ---- 4) Tabs (intercalaires) glued to panel ---- */
+.panel-tabs{
+  position: absolute;
+  left: var(--panel-padding);                 /* inside-left of panel */
+  top: calc(-1 * var(--tab-overhang) + 2px);  /* slightly above top edge */
+  display: flex;
+  gap: var(--tab-gap);
+  z-index: 5;                                  /* above panel content */
+  pointer-events: auto;
+}
+.panel-tabs .tab{
+  font: inherit;
+  letter-spacing: .04em;
+  padding: 4px 10px 3px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid #754d1a;
+  background: linear-gradient(#2b2b2b, #1a1a1a);
+  color: #c2c2c2;
+  text-shadow: 0 0 6px rgba(0,0,0,.6);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 2px 0 rgba(0,0,0,.35);
+  cursor: pointer;
+}
+.panel-tabs .tab:hover{ color:#ffd27a; }
+.panel-tabs .tab.active{
+  color:#ffb347;
+  background: linear-gradient(#3a2a17, #281c11);
+  border-color:#a36a2b;
+  box-shadow:
+    0 0 10px rgba(255,179,71,.25),
+    0 1px 0 rgba(255,255,255,.08) inset;
+}
+
+/* ---- 5) Block 1: Video ---- */
+.confession-screen-container{
+  width: var(--block1-w);
+  height: var(--block1-h);
   background: #000;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: inset 0 0 12px rgba(0,0,0,0.85);
+  box-shadow: inset 0 0 12px rgba(0,0,0,.85);
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 auto;
 }
-
-#confession-screen { 
-  width:100%; 
-  height:100%; 
-  position:relative; 
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
+#confession-screen{ 
+  width:100%; height:100%;
+  position:relative; display:flex;
+  align-items:center; justify-content:center;
   background:#000;
 }
-
 #confession-screen video,
 #confession-screen img,
-#confession-screen iframe {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-  margin: auto;
-  border: 0;
-  background:#000;
+#confession-screen iframe{
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  object-fit: contain; object-position: center;
+  display:block; margin:auto; border:0; background:#000;
 }
 
-/* ============================
-   Bloc 2 : Log (fixe + scroll)
-   ============================ */
-#interaction-container {
-  width: var(--w);
-  height: var(--h2);
-  background: #000;
-  border-radius: 8px;
-  padding: 12px 20px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.85);
+/* ---- 6) Block 2: Log ---- */
+#interaction-container{
+  width: var(--block2-w);
+  height: var(--block2-h);
+  background:#000;
+  border-radius:8px;
+  padding:12px 20px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.85);
   overflow: hidden;
+  margin: 0 auto;
 }
-#interaction-content {
-  height: 100%;
-  overflow-y: auto;
+#interaction-content{
+  height:100%;
+  overflow-y:auto;
   font-size: var(--fs);
-  line-height: 1.3;
+  line-height:1.3;
   color: var(--terminal-color);
   text-shadow: 0 0 6px var(--terminal-glow), 0 0 12px var(--terminal-glow);
   white-space: pre-wrap;
 }
-#interaction-content p { margin: 0; padding: 0; }
+#interaction-content p{ margin:0; padding:0; }
 
-/* ==================================
-   Bloc 3 : Terminal (fixe + scroll)
-   ================================== */
-.terminal-container {
-  width: var(--w);
-  height: var(--h3);
-  background: #000;
-  border-radius: 8px;
-  padding: 12px 20px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.85);
+/* ---- 7) Block 3: Terminal ---- */
+.terminal-container{
+  width: var(--block3-w);
+  height: var(--block3-h);
+  background:#000;
+  border-radius:8px;
+  padding:12px 20px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.85);
   position: relative;
   overflow: hidden;
+  margin: 0 auto;
 }
-
-/* Clé pour supprimer l’espace en haut :
-   le contenu interne est un flex column, sans marges. */
-#terminal-screen {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;  /* colle en haut */
-  align-items: stretch;
-  overflow-y: auto;
+#terminal-screen{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
   font-size: var(--fs);
-  line-height: 1.35;
+  line-height:1.35;
   color: var(--terminal-color);
   text-shadow: 0 0 6px var(--terminal-glow), 0 0 12px var(--terminal-glow);
 }
+#terminal-interface{ display:flex; flex-direction:column; gap:0; height:100%; }
 
-/* Retire tout écart résiduel */
-#terminal-interface { margin: 0; padding: 0; }
-
-/* Ce bloc est vide dans ton UX → on le neutralise totalement
-   pour éviter un “padding fantôme” en haut. */
-#terminal-output {
-  display: none;
-  margin: 0;
-  padding: 0;
-  height: 0;
+/* Hidden by default (JS will show for code prompt) */
+#terminal-output, #feedback-line, .input-line{
+  display:none; margin:0; padding:0;
 }
 
-/* Effet CRT léger */
+/* Choices (JS numbers them; CSS has no list-style) */
+#choices{
+  display:none;
+  flex:1 1 auto;
+  overflow-y:auto;
+  margin:0; padding:0;
+}
+#choices ol{ margin:0; padding:0 0 0 24px; display:block; }
+#choices li{
+  list-style:none;
+  cursor:pointer;
+  padding:2px 0;
+}
+#choices li:hover{ text-decoration: underline; }
+
+/* CRT overlay */
 .screen-overlay{
   position:absolute; inset:0; pointer-events:none;
   background:
@@ -162,62 +218,76 @@ body {
   background-size: 100% 4px, 3px 100%;
   animation: flicker .15s infinite;
 }
-@keyframes flicker { 0%{opacity:1} 50%{opacity:.85} 100%{opacity:1} }
+@keyframes flicker{ 0%{opacity:1} 50%{opacity:.85} 100%{opacity:1} }
 
-/* Ligne de saisie : cachée par défaut (elle n’apparaît
-   que sur les nœuds lockés discount/nsfw) */
-.input-line {
-  display:none;               /* cachée par défaut */
-  align-items:center;
-  gap:6px;
-}
-#code-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
+/* Code input (no white background) */
+.input-line{ display:flex; align-items:center; gap:6px; }
+#code-input{
+  flex:1;
+  background:transparent;
+  border:none; outline:none;
   color: var(--terminal-color);
-  font: inherit;
-  font-size: var(--fs);
+  font: inherit; font-size: var(--fs);
   text-transform: uppercase;
   caret-color: var(--terminal-color);
+  text-shadow: 0 0 6px var(--terminal-glow);
 }
-
-/* ====== LISTE DES CHOIX (aucune indentation, top du bloc) ====== */
-#choices {
-  display: none;              /* JS l’affiche si nécessaire */
-  margin: 0;                  /* supprime l’espace haut */
-  padding: 0;
-  max-height: 100%;
-  overflow-y: auto;
-}
-#choices ol {
-  margin: 0;
-  padding: 0;                 /* pas d’indentation */
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-#choices li {
-  list-style: none;           /* on affiche “1)” via JS */
-  cursor: pointer;
-  padding: 0;                 /* colle au haut du bloc */
-}
-#choices li:hover { text-decoration: underline; }
 
 /* Scrollbars */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,.25); }
-::-webkit-scrollbar-thumb { background: #444; }
-::-webkit-scrollbar-thumb:hover { background: #666; }
+::-webkit-scrollbar{ width:10px; }
+::-webkit-scrollbar-track{ background: rgba(0,0,0,.25); }
+::-webkit-scrollbar-thumb{ background:#444; }
+::-webkit-scrollbar-thumb:hover{ background:#666; }
 
-/* ===== Tweaks mobile ===== */
-@media (max-width: 480px){
-  :root{
-    --fs: clamp(14px, 4vw, 18px);
-    --h1: clamp(200px, 35vh, 400px);
-    --h2: clamp(100px, 18vh, 180px);
-    --h3: clamp(160px, 32vh, 300px);
-  }
-  .container{ padding:12px; border-width:6px; }
+/* ---- 8) Mobile tweaks ---- */
+@media (max-width:480px){
+  .panel-tabs{ top: calc(-1 * var(--tab-overhang)); }
+  .panel-tabs .tab{ padding:3px 8px 2px; font-size:.95em; }
+}
+:root{
+  /* ...tes vars existantes... */
+  --stack-gap: 28px;   /* espace vertical entre les 3 blocs */
+}
+
+/* Le wrapper qui contient Bloc 1, Bloc 2, Bloc 3 */
+#terminal-stack{
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);     /* ← espace entre les blocs */
+  width: 100%;
+  align-items: center;       /* centre les blocs si leurs widths sont < panel */
+}
+
+/* Important: pas de marge verticale sur les blocs, on laisse le gap faire le job */
+.confession-screen-container,
+#interaction-container,
+.terminal-container{
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/* make sure hidden truly hides, regardless of resets */
+[hidden] { display: none !important; }
+/* Bloc TRADE */
+.trade-screen {
+  background: #000;              /* bloc noir */
+  color: #00FF41;                /* texte vert terminal */
+  font-family: 'VT323', monospace;
+  width: 75%;                    /* 3/4 du panneau */
+  margin: 2rem auto;             /* centré horizontalement */
+  padding: 2rem;
+  border-radius: 6px;            /* coins légèrement arrondis */
+}
+
+.trade-content h2 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.trade-content p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
 }
