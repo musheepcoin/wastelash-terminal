@@ -1,0 +1,39 @@
+{
+  "meta": { "version": 1 },
+  "start": "root",
+  "vars": { "nsfw": false },
+
+  "nodes": {
+    "root": {
+      "say": ["Fixer: Connection established. Wastelash online."],
+      "choices": [
+        { "label": "Ask about prints",   "goto": "prints" },
+        { "label": "Trade a rumor",      "goto": "rumor" },
+        { "label": "Request a discount", "goto": "discount" },
+        { "label": "Stupid question",    "goto": "stupid" },
+        { "label": "Toggle NSFW", "actions": ["toggle:nsfw"], "say": ["Fixer: NSFW mode: {{nsfw}}"], "goto": "root" },
+        { "label": "Disconnect", "actions": ["system:disconnect"] }
+      ]
+    },
+
+    "prints": {
+      "say": ["Fixer: Prints? Proof, fake, who cares."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "rumor": {
+      "say": ["Fixer: Rumor—The NCR president snores louder than ghouls."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "discount": {
+      "say": ["Fixer: One-time code: {{genCode(5)}}. Don’t waste it."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "stupid": {
+      "say": ["Fixer: Congratulations. You wasted my time."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    }
+  }
+}
