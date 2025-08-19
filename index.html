@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wastelash Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="page-wrapper">
+    <div class="container">
+
+      <!-- Bloc 1 : Visuel Fixer -->
+      <div class="confession-screen-container">
+        <div id="confession-screen">
+          <video id="fixer-video" autoplay muted loop playsinline>
+            <source src="RENO5.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+      <!-- Bloc 2 : Log terminal (colonne continue) -->
+      <div id="interaction-container">
+        <div id="interaction-content">
+          SYSTEM BOOTING...
+          WELCOME, OPERATOR. AWAITING INPUT.
+        </div>
+      </div>
+
+      <!-- Bloc 3 : Terminal (login + choix) -->
+      <div class="terminal-container">
+        <div class="screen-overlay"></div>
+        <div id="terminal-screen">
+          <div id="terminal-interface">
+            <div id="terminal-output">
+              <p>ENTER 5-LETTER ACCESS CODE TO VIEW ARCHIVE.</p>
+            </div>
+            <div class="input-line">
+              <span>>&nbsp;</span>
+              <input type="text" id="code-input" maxlength="5" autofocus autocomplete="off" spellcheck="false">
+            </div>
+            <p id="feedback-line">&nbsp;</p>
+            <div id="choices"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
