@@ -9,25 +9,41 @@
       "choices": [
         { "label": "Ask about prints",   "goto": "prints" },
         { "label": "Trade a rumor",      "goto": "rumor" },
-        { "label": "Request a discount", "goto": "discount" },
+        { "label": "Request a discount", "goto": "discount_locked" },
         { "label": "Stupid question",    "goto": "stupid" },
-        { "label": "Toggle NSFW", "actions": ["toggle:nsfw"], "say": ["Fixer: NSFW mode: {{nsfw}}"], "goto": "root" },
-        { "label": "Disconnect", "actions": ["system:disconnect"] }
+        { "label": "Toggle NSFW",        "goto": "nsfw_locked" },
+        { "label": "Disconnect",         "actions": ["system:disconnect"] }
       ]
     },
 
     "prints": {
-      "say": ["Fixer: Prints? Proof, fake, who cares."],
+      "say": ["Fixer: Prints? Proof, fake, who cares. You pay, you take, you shut up."],
       "choices": [{ "label": "Back", "goto": "root" }]
     },
 
     "rumor": {
-      "say": ["Fixer: Rumor—The NCR president snores louder than ghouls."],
+      "say": ["Fixer: Rumor—Some Vault exploded out east. Smelled like barbecue for days."],
       "choices": [{ "label": "Back", "goto": "root" }]
     },
 
-    "discount": {
-      "say": ["Fixer: One-time code: {{genCode(5)}}. Don’t waste it."],
+    "discount_locked": {
+      "say": ["Fixer: Reduction? Yeah, right. Not without the code. No code, no caps saved."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "discount_unlocked": {
+      "say": ["Fixer: Fine. Code accepted. One-time code: {{genCode(5)}}. Don’t waste it."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "nsfw_locked": {
+      "say": ["Fixer: Oh, so you came for that? Sorry, not free. Bring the code, pervert."],
+      "choices": [{ "label": "Back", "goto": "root" }]
+    },
+
+    "nsfw_unlocked": {
+      "say": ["Fixer: NSFW mode unlocked. Don’t say I didn’t warn you."],
+      "actions": ["toggle:nsfw"],
       "choices": [{ "label": "Back", "goto": "root" }]
     },
 

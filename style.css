@@ -1,13 +1,14 @@
+/* ===== Reset menu (garde simple) ===== */
 :root {
   --terminal-color: #00FF41;
   --terminal-glow: rgba(0,255,65,0.25);
 
   /* ===== Responsive layout ===== */
-  --w:  min(900px, 92vw);            /* largeur max des blocs */
+  --w:  min(900px, 92vw);
   --h1: clamp(220px, 40vh, 480px);   /* Bloc 1 : vidéo */
   --h2: clamp(110px, 18vh, 200px);   /* Bloc 2 : log */
   --h3: clamp(160px, 30vh, 320px);   /* Bloc 3 : terminal */
-  --fs: clamp(16px, 2.4vw, 22px);    /* taille de police UI */
+  --fs: clamp(16px, 2.4vw, 22px);
 }
 
 * { box-sizing: border-box; }
@@ -16,7 +17,7 @@ body {
   margin: 0;
   font-family: 'VT323', monospace;
   color: var(--terminal-color);
-  background: #111 url('outpost.jpg') center/cover fixed no-repeat;
+  background: #111 url('outpost.jpg') center/cover no-repeat;
 }
 
 #page-wrapper {
@@ -41,15 +42,15 @@ body {
   padding: 20px;
   border: 8px solid #333;
   border-radius: 12px;
-  background-color: #000;                 /* base sombre */
-  background-image: url('background.png');/* texture métal */
+  background-color: #000;                  /* base sombre */
+  background-image: url('background.png'); /* texture métal */
   background-size: cover;
   background-position: center;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.85), 0 0 20px #000;
 }
 
 /* ======================
-   Bloc 1 : Vidéo (fixe)
+   Bloc 1 : Visuel Fixer
    ====================== */
 .confession-screen-container {
   width: var(--w);
@@ -124,8 +125,15 @@ body {
   position: relative;
   overflow: hidden;
 }
+
+/* Clé pour supprimer l’espace en haut :
+   le contenu interne est un flex column, sans marges. */
 #terminal-screen {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* colle en haut */
+  align-items: stretch;
   overflow-y: auto;
   font-size: var(--fs);
   line-height: 1.35;
@@ -133,6 +141,19 @@ body {
   text-shadow: 0 0 6px var(--terminal-glow), 0 0 12px var(--terminal-glow);
 }
 
+/* Retire tout écart résiduel */
+#terminal-interface { margin: 0; padding: 0; }
+
+/* Ce bloc est vide dans ton UX → on le neutralise totalement
+   pour éviter un “padding fantôme” en haut. */
+#terminal-output {
+  display: none;
+  margin: 0;
+  padding: 0;
+  height: 0;
+}
+
+/* Effet CRT léger */
 .screen-overlay{
   position:absolute; inset:0; pointer-events:none;
   background:
@@ -143,42 +164,44 @@ body {
 }
 @keyframes flicker { 0%{opacity:1} 50%{opacity:.85} 100%{opacity:1} }
 
-/* Ligne de saisie + input */
+/* Ligne de saisie : cachée par défaut (elle n’apparaît
+   que sur les nœuds lockés discount/nsfw) */
 .input-line {
-  display:flex;
+  display:none;               /* cachée par défaut */
   align-items:center;
   gap:6px;
 }
 #code-input {
   flex: 1;
-  background: transparent;     /* terminal style */
+  background: transparent;
   border: none;
   outline: none;
   color: var(--terminal-color);
   font: inherit;
-  font-size: var(--fs);        /* taille synchronisée avec Bloc 2 */
+  font-size: var(--fs);
   text-transform: uppercase;
   caret-color: var(--terminal-color);
 }
 
-/* Liste numérotée */
-#choices { 
-  display: none; 
-  margin-top: 10px; 
-  max-height: calc(100% - 10px); 
+/* ====== LISTE DES CHOIX (aucune indentation, top du bloc) ====== */
+#choices {
+  display: none;              /* JS l’affiche si nécessaire */
+  margin: 0;                  /* supprime l’espace haut */
+  padding: 0;
+  max-height: 100%;
   overflow-y: auto;
 }
 #choices ol {
   margin: 0;
-  padding-left: 28px;
+  padding: 0;                 /* pas d’indentation */
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 #choices li {
+  list-style: none;           /* on affiche “1)” via JS */
   cursor: pointer;
-  padding: 2px 0;
-  list-style: decimal;
+  padding: 0;                 /* colle au haut du bloc */
 }
 #choices li:hover { text-decoration: underline; }
 
@@ -188,7 +211,7 @@ body {
 ::-webkit-scrollbar-thumb { background: #444; }
 ::-webkit-scrollbar-thumb:hover { background: #666; }
 
-/* ===== Tweaks mobile étroit ===== */
+/* ===== Tweaks mobile ===== */
 @media (max-width: 480px){
   :root{
     --fs: clamp(14px, 4vw, 18px);
