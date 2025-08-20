@@ -169,7 +169,7 @@ body{
   z-index: 2; /* sous le halo, au-dessus de la vidéo */
 }
 
-/* halo vert intérieur (inchangé) */
+/* halo vert intérieur (SANS liseret, halo bien visible) */
 .confession-screen-container::after{
   content:"";
   position:absolute;
@@ -177,7 +177,7 @@ body{
   pointer-events:none;
   border-radius:12px;
   box-shadow:
-    0 0 0 1px rgba(0,255,65,.28),
+    /* ligne verte supprimée */
     0 0 20px rgba(0,255,65,.10),
     inset 0 0 28px rgba(0,255,65,.22);
   z-index: 3;
