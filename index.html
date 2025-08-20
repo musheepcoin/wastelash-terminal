@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,8 @@
   <title>Wastelash Terminal</title>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- (Optionnel) Preload de l'image de boot -->
+  <!-- <link rel="preload" as="image" href="RENO5.png"> -->
 </head>
 <body>
   <div id="page-wrapper">
@@ -28,12 +31,16 @@
 
       <!-- ======= STACK TERMINAL ======= -->
       <div id="terminal-stack" hidden>
-        <!-- Bloc 1 : Visuel Fixer (masqué au départ, pas d’autoplay) -->
+
+        <!-- Bloc 1 : Visuel (vidéo au boot, images possibles plus tard) -->
         <div class="confession-screen-container">
           <div id="confession-screen" hidden>
-            <video id="fixer-video" muted loop playsinline>
-              <source src="RENO5.mp4" type="video/mp4">
+            <!-- Vidéo par défaut -->
+            <video id="fixer-visual-video" muted loop playsinline>
+              <source id="fixer-video-source" src="RENO5.mp4" type="video/mp4">
             </video>
+            <!-- Image (affichée plus tard via JS) -->
+            <img id="fixer-visual-img" src="" alt="Fixer visual" hidden>
           </div>
         </div>
 
@@ -92,6 +99,7 @@
     </div>
   </div>
 
+  <!-- Ajoute un cache-buster si tu modifies souvent le JS : script.js?v=2 -->
   <script src="script.js"></script>
 </body>
 </html>

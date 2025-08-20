@@ -6,11 +6,14 @@ const codeInput   = document.getElementById('code-input');          // terminal-
 const terminalOut = document.getElementById('terminal-output');     // unused (kept for layout)
 const feedback    = document.getElementById('feedback-line');       // unused
 
-// Stacks (+ legacy connect gate, non utilisé pour l'entrée désormais)
+// Stacks (+ legacy connect gate)
 const stackTerm   = document.getElementById('terminal-stack');
 const stackTrade  = document.getElementById('trade-stack');
 const connectGate = document.getElementById('connect-gate'); // peut ne pas exister
 const btnConnect  = document.getElementById('btn-connect');  // idem
+
+// === Boot: toujours une vidéo ===
+const BOOT_VIDEO_SRC = 'RENO5.mp4';
 
 // === State ===
 let conversation   = {};
@@ -20,21 +23,19 @@ let unlocks        = { discount: false, nsfw: false };
 let requestContext = null; // "discount" | "nsfw" | null
 let isConnected    = false; // passe à true après "Connect to the Outpost"
 
-// === Helpers ===
+// === Helpers (Bloc 2) ===
 function say(line){
   bloc2.textContent = line;
   bloc2.scrollTop = bloc2.scrollHeight;
 }
 function sayAppend(line){
-  bloc2.textContent = bloc2.textContent
-    ? (bloc2.textContent + "\n" + line)
-    : line;
+  bloc2.textContent = bloc2.textContent ? (bloc2.textContent + "\n" + line) : line;
   bloc2.scrollTop = bloc2.scrollHeight;
 }
 function clearLog(){ bloc2.textContent = ""; }
 
+// Choix
 function showChoices(show){ choices.style.display = show ? 'block' : 'none'; }
-
 function setChoices(list){
   lastChoices = list.slice();
   choices.innerHTML = '';
@@ -51,46 +52,75 @@ function setChoices(list){
   choices.scrollTop = 0;
 }
 
-// === Fixer screen controls (Bloc 1) ===
-function hideFixerScreen(){
-  const vid = document.getElementById('fixer-video');
-  const screen = document.getElementById('confession-screen');
-  if (vid){
-    vid.pause?.();
-    vid.currentTime = 0;
-  }
-  if (screen){
-    screen.dataset.prevDisplay = screen.style.display || '';
-    screen.hidden = true;
-    screen.style.display = 'none';
-  }
+// === Fixer screen controls (Bloc 1 : image/vidéo) ===
+function getVisualElems(){
+  return {
+    wrap:  document.getElementById('confession-screen'),
+    img:   document.getElementById('fixer-visual-img'),
+    video: document.getElementById('fixer-visual-video'),
+    vsrc:  document.getElementById('fixer-video-source')
+  };
 }
-function showFixerScreenAndPlay(){
-  const vid = document.getElementById('fixer-video');
-  const screen = document.getElementById('confession-screen');
-  if (screen){
-    screen.hidden = false;                 // enlève l’attribut hidden
-    screen.style.display = 'block';        // s’assure qu’il est visible
+
+function hideFixerScreen(){
+  const { wrap, video, img } = getVisualElems();
+  if (video){
+    try { video.pause(); } catch(e){}
+    video.currentTime = 0;
+    video.hidden = true;
   }
-  if (vid){
-    vid.muted = true; // sécurité mobile
-    vid.play().catch((err)=>{
-      // Plan B : rejouer dès qu’elle est prête
-      vid.addEventListener('canplay', ()=> vid.play().catch(()=>{}), { once:true });
-      vid.load();
-    });
+  if (img){
+    img.hidden = true;
+    img.removeAttribute('src');
+  }
+  if (wrap){
+    wrap.hidden = true;
+    wrap.style.display = 'none';
   }
 }
 
-// ✅ PRIMER: capture le geste utilisateur (obligatoire pour autoplay)
+// Affiche une image (utilisable pendant la conversation)
+function showImage(src){
+  const { wrap, img, video } = getVisualElems();
+  if (!wrap || !img || !video) return;
+
+  try { video.pause(); } catch(e){}
+  video.hidden = true;
+
+  img.src = src;
+  img.hidden = false;
+
+  wrap.hidden = false;
+  wrap.style.display = 'block';
+}
+
+// Affiche une vidéo (boot ou plus tard)
+function showVideo(src){
+  const { wrap, img, video, vsrc } = getVisualElems();
+  if (!wrap || !img || !video || !vsrc) return;
+
+  img.hidden = true;
+
+  if (src && vsrc.src !== src) vsrc.src = src;
+  video.load();
+  video.hidden = false;
+
+  wrap.hidden = false;
+  wrap.style.display = 'block';
+
+  // Autoplay (muted => OK mobile)
+  video.muted = true;
+  video.play().catch(()=>{
+    video.addEventListener('canplay', ()=> video.play().catch(()=>{}), { once:true });
+  });
+}
+
+// ✅ PRIMER: capture le geste utilisateur (autoplay mobile)
 function primeFixerVideo(){
-  const vid = document.getElementById('fixer-video');
-  if (!vid) return;
-  vid.muted = true;
-  // on tente play -> pause immédiatement, ce qui “autorise” l’autoplay ensuite
-  vid.play()
-    .then(()=> { vid.pause(); vid.currentTime = 0; })
-    .catch(()=> {/* ignore, on réessaiera en fin de boot */});
+  const { video } = getVisualElems();
+  if (!video) return;
+  video.muted = true;
+  video.play().then(()=> { video.pause(); video.currentTime = 0; }).catch(()=>{});
 }
 
 // === Code prompt visibility ===
@@ -109,7 +139,7 @@ function hideCodePrompt(){
   codeInput.removeAttribute("placeholder");
 }
 
-// === Boot sequence ===
+// === Boot sequence (vidéo au chargement) ===
 const bootLines = [
   "> Establishing uplink...",
   "> Signal unstable... rerouting through wasteland node.",
@@ -127,7 +157,7 @@ function bootSequence(){
     } else {
       setTimeout(()=>{
         clearLog();
-        showFixerScreenAndPlay(); // vidéo seulement APRÈS le boot
+        showVideo(BOOT_VIDEO_SRC);  // ← toujours une vidéo au boot
         loadConversation();
       }, 300);
     }
@@ -149,7 +179,7 @@ async function loadConversation(){
     const res = await fetch('conversation.json', { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     conversation = await res.json();
-    gotoNode('root');
+    gotoNode(conversation?.start || 'root');
   }catch(err){
     say(`> ERROR: cannot load conversation.json (${err.message})`);
     showChoices(false);
@@ -181,6 +211,7 @@ function gotoNode(nodeId){
         return unlocks.nsfw ? gotoNode("nsfw_unlocked") : gotoNode("nsfw_locked");
       }
       requestContext = null;
+
       if (Array.isArray(c.actions)) c.actions.forEach(a => runAction(a));
       if (c.say){
         const s = Array.isArray(c.say) ? c.say.join("\n") : String(c.say);
@@ -197,7 +228,7 @@ function gotoNode(nodeId){
 
 // === Session helpers ===
 function showConnectChoice(){
-  // ✅ Active les raccourcis numériques dès l’écran d’arrivée
+  // Active les raccourcis numériques dès l’écran d’arrivée
   isConnected = true;
 
   hideFixerScreen();          // Bloc 1 off
@@ -205,10 +236,9 @@ function showConnectChoice(){
   say("> Awaiting connection...");
   setChoices([
     { label: "Connect to the Outpost", onClick: () => {
-        // on garde le “primer” au clic pour l’autoplay mobile
-        primeFixerVideo();
+        primeFixerVideo();    // primer autoplay mobile
         hideFixerScreen();
-        bootSequence();       // la vidéo s’affichera et jouera en fin de boot
+        bootSequence();       // la vidéo sera lancée en fin de boot
       }
     }
   ]);
@@ -220,7 +250,7 @@ function softReboot(){
   bootSequence();
 }
 
-// === Actions ===
+// === Actions (depuis conversation.json) ===
 function runAction(action){
   if (!action || typeof action !== 'string') return;
 
@@ -229,16 +259,23 @@ function runAction(action){
     unlocks[key] = !unlocks[key];
 
   } else if (action === "system:disconnect"){
-    // reset all unlocks à false
     unlocks.discount = false;
     unlocks.nsfw = false;
-
     say("> Disconnected.");
     hideCodePrompt();
     showChoices(false);
-
-    // retour à l’écran “1) Connect to the Outpost”
     setTimeout(()=> showConnectChoice(), 600);
+
+  } else if (action.startsWith("showImage:")){
+    const src = action.slice("showImage:".length).trim();
+    if (src) showImage(src);
+
+  } else if (action.startsWith("showVideo:")){
+    const src = action.slice("showVideo:".length).trim();
+    showVideo(src || BOOT_VIDEO_SRC);
+
+  } else if (action === "hideVisual"){
+    hideFixerScreen();
   }
 }
 
@@ -276,7 +313,7 @@ if (codeInput){
 
 // === Keyboard shortcuts ===
 document.addEventListener("keydown", (e)=>{
-  if (!isConnected) return; // désactivé tant que pas “connect-choice” affiché
+  if (!isConnected) return;
 
   const inputVisible = inputLine && inputLine.style.display !== 'none';
   if (inputVisible && document.activeElement === codeInput) return;
@@ -307,7 +344,7 @@ function genCode(length){
 // === Tabs ===
 let _choicesWasVisible = false;
 function switchTab(target){
-  if (!isConnected) return; // pas de switch avant connexion
+  if (!isConnected) return;
 
   const tabTerm    = document.getElementById('tab-terminal');
   const tabTrade   = document.getElementById('tab-trade');
@@ -342,7 +379,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if (tabTerm)  tabTerm.addEventListener('click',  ()=> switchTab('terminal'));
   if (tabTrade) tabTrade.addEventListener('click', ()=> switchTab('trade'));
 
-  // si un ancien écran connectGate existe encore, on le neutralise (on n’en a pas besoin)
   if (connectGate) connectGate.hidden = true;
   btnConnect?.remove();
 });
@@ -352,15 +388,11 @@ window.onload = () => {
   if (terminalOut) terminalOut.style.display = 'none';
   if (feedback)    feedback.style.display    = 'none';
 
-  // Afficher le stack terminal; trade off
   if (stackTerm)  stackTerm.hidden  = false;
   if (stackTrade) stackTrade.hidden = true;
 
-  // Vidéo coupée/masquée tant qu'on n'est pas connecté
-  hideFixerScreen();
-
-  // État initial Bloc 3 : 1. Connect to the Outpost (raccourcis actifs)
+  hideFixerScreen();      // visuel caché avant connexion
   showChoices(false);
   hideCodePrompt();
-  showConnectChoice();
+  showConnectChoice();    // affiche "Connect to the Outpost"
 };
