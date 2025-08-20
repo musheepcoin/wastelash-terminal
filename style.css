@@ -338,8 +338,42 @@ body{
   margin-bottom:1rem;
 }
 
-/* ---- 10) Mobile ---- */
-@media (max-width:480px){
-  .panel-tabs{ top: calc(-1 * var(--tab-overhang)); }
-  .panel-tabs .tab{ padding:3px 8px 2px; font-size:.95em; }
+/* === Mobile fixes (tabs + video) === */
+@media (max-width: 480px){
+  /* Slightly smaller tabs and less overhang so they don't get cut */
+  :root{
+    --tab-scale: 1.0;      /* was 1.3 */
+    --tab-overhang: 16px;  /* was 24px */
+    --block1-h: auto;      /* let height follow aspect on mobile */
+  }
+
+  /* Nudge the whole page down below the browser UI / notch */
+  #page-wrapper{
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+  }
+
+  /* Pull tabs down a bit so they remain fully visible */
+  .panel-tabs{
+    top: calc(-0.65 * var(--tab-overhang));
+    transform: scale(var(--tab-scale)); /* uses the mobile var above */
+  }
+
+  /* Keep block 1 responsive without cropping */
+  .confession-screen-container{
+    aspect-ratio: 16 / 9;  /* maintain a safe video ratio on phones */
+    overflow: hidden;      /* hide any tiny overflow from rounding */
+  }
+
+  /* Make sure media never crops: fill inside, keep full content */
+  #confession-screen video,
+  #confession-screen img,
+  #confession-screen iframe{
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
 }
+
