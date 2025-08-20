@@ -137,41 +137,58 @@ body{
   box-shadow: none;
 }
 
-/* ---- 5) Block 1: Visual ---- */
+/* ---- 5) Block 1: Visual (confession) ---- */
 .confession-screen-container{
   width: var(--block1-w);
   height: var(--block1-h);
   background: #000;
-  border-radius: var(--block1-radius);
-  overflow: visible;
+  border-radius: 0;          /* coins angulaires */
+  overflow: visible;         /* nécessaire pour voir le cadre extérieur */
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto;
-
-  position: relative;
-  isolation: isolate;
-
-  /* déplacement indépendant */
-  transform: translateY(var(--b1-shift));
-  will-change: transform;
+  position: relative;        /* borne les pseudos */
+  box-shadow: none;
 }
 
-/* HALO */
+/* Cadre TV EXTERIEUR */
 .confession-screen-container::before{
   content:"";
   position:absolute;
-  inset:0;
-  border-radius: var(--block1-radius);
+  /* pousse le cadre hors du bloc sans affecter le layout */
+  left: calc(-1 * var(--tv-border-w));
+  right: calc(-1 * var(--tv-border-w));
+  top: calc(-1 * var(--tv-border-w));
+  bottom: calc(-1 * var(--tv-border-w));
   pointer-events:none;
-  z-index: 2;
+  z-index:2;
+
+  /* Fallback robuste mobile (au cas où border-image glitche) */
+  background: url('tv-border.png') center / 100% 100% no-repeat;
+
+  /* Si border-image est OK, il “prend le dessus” naturellement */
+  border: var(--tv-border-w) solid transparent;
+  border-image-source: url('tv-border.png');
+  border-image-slice: var(--tv-border-slice);
+  border-image-repeat: round;
+}
+
+/* Halo VERT INTERIEUR (pas sur le cadre) */
+.confession-screen-container::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:0;           /* coins angulaires, comme demandé */
   box-shadow:
     0 0 0 1px rgba(0,255,65,.28),
     0 0 20px rgba(0,255,65,.10),
     inset 0 0 28px rgba(0,255,65,.22);
+  z-index:3;
 }
 
-/* Contenu (vidéo/image) */
+/* Le contenu clippe ses bords, sans arrondi */
 #confession-screen{
   width:100%;
   height:100%;
@@ -180,10 +197,15 @@ body{
   align-items:center;
   justify-content:center;
   background:#000;
-  border-radius: var(--block1-radius);
-  overflow: hidden;
-  z-index: 0;
+  border-radius:0;           /* coins angulaires */
+  overflow:hidden;
 }
+
+/* Mobile : bord un peu plus fin pour éviter l’écrasement vertical */
+@media (max-width: 480px){
+  :root{ --tv-border-w: 10px; }
+}
+
 
 /* TV FRAME overlay (PNG centre transparent) */
 .tv-frame{
