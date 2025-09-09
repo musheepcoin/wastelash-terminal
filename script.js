@@ -1,164 +1,89 @@
-/* ===========================
-   NAVIGATION DES MURS
-   =========================== */
-
-// Cible uniquement les boutons de la nav (pas ceux du jukebox)
+// --- NAV DES MURS (ne cible que les boutons ayant data-target) ---
 const navButtons = document.querySelectorAll('header .menu button[data-target]');
 const walls = document.querySelectorAll('.wall');
 
-// Restaure le dernier mur visité si présent
-const LAST_WALL_KEY = 'cafe_last_wall';
-const lastWallId = localStorage.getItem(LAST_WALL_KEY);
-
-function showWall(id){
-  walls.forEach(w => w.classList.remove('active'));
-  const pane = document.getElementById(id);
-  if (pane) pane.classList.add('active');
-
-  navButtons.forEach(b => {
-    const isActive = b.dataset.target === id;
-    b.classList.toggle('active', isActive);
-    if (isActive) b.setAttribute('aria-current', 'page');
-    else b.removeAttribute('aria-current');
-  });
-
-  localStorage.setItem(LAST_WALL_KEY, id);
-}
-
-// Bind clics
 navButtons.forEach(btn => {
-  btn.addEventListener('click', () => showWall(btn.dataset.target));
+  btn.addEventListener('click', () => {
+    navButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    walls.forEach(w => w.classList.remove('active'));
+    const target = btn.dataset.target;
+    const pane = document.getElementById(target);
+    if (pane) pane.classList.add('active');
+  });
 });
 
-// Affiche au chargement
-if (lastWallId && document.getElementById(lastWallId)) {
-  showWall(lastWallId);
-} else {
-  const first = navButtons[0];
-  if (first) showWall(first.dataset.target);
-}
-
-/* ===========================
-   JUKEBOX YOUTUBE
-   =========================== */
-
+// --- JUKEBOX YOUTUBE ---
 let player;
 
-// ✅ Mets ici ton ID de playlist YouTube
-const PLAYLIST_ID = 'YOUR_YT_PLAYLIST_ID';
-
-// Sélecteurs utiles
-const $ = (id) => document.getElementById(id);
-const btnPlay = $('jb-play');
-const btnNext = $('jb-next');
-const btnPrev = $('jb-prev');
-const btnMute = $('jb-mute');
-
-// API ready callback (appelée par YouTube)
-window.onYouTubeIframeAPIReady = function(){
-  const target = document.getElementById('yt-jukebox');
-  if (!target) return;
-
+// YouTube Iframe API callback
+function onYouTubeIframeAPIReady(){
+  // Lecteur invisible (audio only) : veille à avoir <div id="yt-jukebox"></div> dans le HTML
   player = new YT.Player('yt-jukebox', {
     height: '0',
-    width:  '0',
+    width: '0',
+    videoId: '3jeZn50KHSs', // ID de la vidéo Ambiencecollector
     playerVars: {
-      listType: 'playlist',
-      list: PLAYLIST_ID,
-      autoplay: 0,
+      autoplay: 0,            // démarre seulement sur clic
       controls: 0,
       modestbranding: 1,
-      rel: 0
+      rel: 0,
+      loop: 1,                // boucle ON
+      playlist: '3jeZn50KHSs' // requis par YouTube pour boucler une vidéo unique
+      // si tu veux démarrer à 4449s : start: 4449
     },
     events: {
-      onReady: onPlayerReady,
-      onStateChange: onPlayerStateChange,
-      onError: (e) => console.warn('[Jukebox] YT error:', e.data)
+      onReady: bindControls,
+      onStateChange: onStateChange
     }
   });
-};
-
-function onPlayerReady(){
-  // Fils events
-  if (btnPlay) btnPlay.onclick = togglePlay;
-  if (btnNext) btnNext.onclick = () => player && player.nextVideo();
-  if (btnPrev) btnPrev.onclick = () => player && player.previousVideo();
-  if (btnMute) btnMute.onclick = toggleMute;
-
-  // Volume de départ doux
-  try { player.setVolume(50); } catch {}
-  // Icône initiale
-  setPlayIcon(false);
-  setMuteIcon(player.isMuted && player.isMuted());
 }
 
-function onPlayerStateChange(e){
-  // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
-  setPlayIcon(e.data === YT.PlayerState.PLAYING);
-  if (e.data === YT.PlayerState.ENDED) {
-    // Option: passer automatiquement à la suivante (YT le fait déjà en playlist)
-  }
+// Lier les boutons du mini-lecteur
+function bindControls(){
+  const $ = s => document.getElementById(s);
+  const play = $('jb-play');
+  const next = $('jb-next');
+  const prev = $('jb-prev');
+  const mute = $('jb-mute');
+
+  if (play) play.onclick = togglePlay;
+  if (next) next.onclick = () => player && player.nextVideo();      // n’aura pas d’effet sans vraie playlist
+  if (prev) prev.onclick = () => player && player.previousVideo();  // idem
+  if (mute) mute.onclick = toggleMute;
 }
 
+// Met à jour l’icône play/pause
+function onStateChange(e){
+  const playBtn = document.getElementById('jb-play');
+  if (!playBtn) return;
+  if (e.data === YT.PlayerState.PLAYING) playBtn.textContent = '⏸️';
+  if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) playBtn.textContent = '▶️';
+}
+
+// Play / Pause (nécessite un clic utilisateur pour démarrer)
 function togglePlay(){
-  if (!player || !player.getPlayerState) return;
+  if (!player) return;
   const state = player.getPlayerState();
   if (state === YT.PlayerState.PLAYING) {
     player.pauseVideo();
-    setPlayIcon(false);
   } else {
-    // Lecture autorisée uniquement suite à une interaction utilisateur (OK ici)
     player.playVideo();
-    setPlayIcon(true);
   }
 }
 
+// Mute / Unmute
 function toggleMute(){
-  if (!player || !player.isMuted) return;
-  if (player.isMuted()) {
-    player.unMute();
-    setMuteIcon(false);
-  } else {
-    player.mute();
-    setMuteIcon(true);
-  }
-}
-
-function setPlayIcon(isPlaying){
-  if (!btnPlay) return;
-  // Si tu utilises mes SVG, alterne display none/block ici.
-  // Ici on swap l’emoji pour rester simple :
-  btnPlay.textContent = isPlaying ? '⏸️' : '▶️';
-}
-
-function setMuteIcon(isMuted){
-  if (!btnMute) return;
-  btnMute.textContent = isMuted ? '🔈' : '🔇';
+  if (!player) return;
+  if (player.isMuted()) player.unMute();
+  else player.mute();
 }
 
 // Charger l'API YouTube une seule fois
-(function loadYTAPI(){
-  if (!PLAYLIST_ID || PLAYLIST_ID === 'YOUR_YT_PLAYLIST_ID') {
-    console.warn('[Jukebox] Renseigne PLAYLIST_ID pour activer la musique.');
-  }
+(function(){
   if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
     const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
   }
 })();
-
-/* ===========================
-   RACCOURCIS CLAVIER (option)
-   =========================== */
-// Espace = Play/Pause, ← = Prev, → = Next, M = Mute
-window.addEventListener('keydown', (e) => {
-  const tag = (e.target.tagName || '').toLowerCase();
-  // Évite de casser la saisie dans inputs/textareas
-  if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
-
-  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  else if (e.code === 'ArrowRight') { e.preventDefault(); btnNext?.click(); }
-  else if (e.code === 'ArrowLeft') { e.preventDefault(); btnPrev?.click(); }
-  else if (e.key.toLowerCase() === 'm') { e.preventDefault(); toggleMute(); }
-});
