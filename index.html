@@ -1,105 +1,72 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wastelash Terminal</title>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>Café of Broken Dreams</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CSS principal + jukebox -->
   <link rel="stylesheet" href="style.css">
-  <!-- (Optionnel) Preload de l'image de boot -->
-  <!-- <link rel="preload" as="image" href="RENO5.png"> -->
+  <link rel="stylesheet" href="jukebox.css">
 </head>
 <body>
-  <div id="page-wrapper">
-    <div class="container">
 
-      <!-- Onglets en haut-gauche du panneau -->
-      <div class="panel-tabs">
-        <button id="tab-terminal" class="tab active">TERMINAL</button>
-        <button id="tab-trade" class="tab">TRADE</button>
+<header class="topbar">
+  <nav class="menu" aria-label="Navigation des murs">
+    <button type="button" class="active" data-target="mur1" aria-current="page">Mur A</button>
+    <button type="button" data-target="mur2">Mur B</button>
+    <button type="button" data-target="mur3">Mur C</button>
+    <button type="button" data-target="ardoise">Ardoise</button>
+  </nav>
+
+  <!-- Mini-lecteur jukebox (dans la barre, à droite) -->
+  <div class="jukebox-mini" role="region" aria-label="Jukebox"
+       style="background:
+         radial-gradient(120% 120% at 15% 0%, rgba(255,180,80,.25), rgba(0,0,0,0) 60%),
+         url('YOUR_JUKEBOX_IMAGE') center/cover no-repeat,
+         linear-gradient(#3b2e21, #2a221a);">
+    <div class="jb-face">
+      <span class="jb-lamp" aria-hidden="true"></span>
+      <div class="jb-controls" role="group" aria-label="Jukebox controls">
+        <button class="jb-btn" id="jb-prev"  type="button" aria-label="Previous" title="Previous">⏮</button>
+        <button class="jb-btn" id="jb-play"  type="button" aria-label="Play/Pause" title="Insert 1 Cap • Play/Pause">▶️</button>
+        <button class="jb-btn" id="jb-next"  type="button" aria-label="Next" title="Next">⏭</button>
+        <button class="jb-btn" id="jb-mute"  type="button" aria-label="Mute/Unmute" title="Out of order? Mute/Unmute">🔇</button>
       </div>
-
-      <!-- ======= CONNECT GATE (écran d’accueil) ======= -->
-      <div id="connect-gate">
-        <div class="connect-panel">
-          <h1>WASTELASH</h1>
-          <p>Outpost link idle. Establish connection?</p>
-          <button id="btn-connect" class="connect-btn">Connect to the Outpost</button>
-        </div>
-      </div>
-
-      <!-- ======= STACK TERMINAL ======= -->
-      <div id="terminal-stack" hidden>
-
-        <!-- Bloc 1 : Visuel (vidéo au boot, images possibles plus tard) -->
-        <div class="confession-screen-container">
-          <div id="confession-screen" hidden>
-            <!-- Vidéo par défaut -->
-            <video id="fixer-visual-video" muted loop playsinline>
-              <source id="fixer-video-source" src="RENO5.mp4" type="video/mp4">
-            </video>
-            <!-- Image (affichée plus tard via JS) -->
-            <img id="fixer-visual-img" src="" alt="Fixer visual" hidden>
-          </div>
-        </div>
-
-        <!-- Bloc 2 : Log terminal -->
-        <div id="interaction-container">
-          <div id="interaction-content">
-            <!-- Ce texte sera remplacé par le bootSequence -->
-          </div>
-        </div>
-
-        <!-- Bloc 3 : Terminal (login + choix) -->
-        <div class="terminal-container">
-          <div class="screen-overlay"></div>
-          <div id="terminal-screen">
-            <div id="terminal-interface">
-              <div id="terminal-output"></div>
-              <div class="input-line">
-                <span>>&nbsp;</span>
-                <input
-                  type="text"
-                  id="code-input"
-                  maxlength="5"
-                  disabled
-                  placeholder="System ready..."
-                  autocomplete="off"
-                  spellcheck="false">
-              </div>
-              <p id="feedback-line">&nbsp;</p>
-              <div id="choices"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ======= STACK TRADE ======= -->
-      <div id="trade-stack" hidden>
-        <div class="trade-container">
-          <div class="trade-screen">
-            <div class="trade-content">
-              <h2>The Trading Outpost</h2>
-              <p>
-                The Outpost is a waypoint in the middle of the wasteland, a trading counter where recovered things pile up.
-                Fragments, images, memories torn from ruins or scavenged on black markets. Nothing here is complete, nothing is certain:
-                every piece has circulated, changed hands, passed through places long forgotten.
-              </p>
-              <p>
-                Some call them evidence, others call them fabrications. I compile them, stack them, and sell them.
-                Truth doesn’t matter. Only the legend you take with you… and the caps you leave behind.
-              </p>
-              <p>☢️ Coming soon: catalogue, filtres, et panier ☢️</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    </div>
+    <!-- lecteur YT caché -->
+    <div class="visually-hidden">
+      <div id="yt-jukebox"></div>
     </div>
   </div>
+</header>
 
-  <!-- Ajoute un cache-buster si tu modifies souvent le JS : script.js?v=2 -->
-  <script src="script.js"></script>
+<main>
+  <section id="mur1" class="wall active" aria-label="Mur A — posters vintage">
+    <img src="wall_a.png" alt="Mur A - posters vintage">
+  </section>
+
+  <section id="mur2" class="wall" aria-label="Mur B — tirages photo">
+    <img src="wall_b.png" alt="Mur B - tirages photo">
+  </section>
+
+  <section id="mur3" class="wall" aria-label="Mur C — documents administratifs">
+    <img src="wall_c.png" alt="Mur C - docs administratifs">
+  </section>
+
+  <section id="ardoise" class="wall" aria-label="Ardoise du Café">
+    <div class="chalk">
+      <h2>Ardoise du Café</h2>
+      <ul>
+        <li>[2077-10-20] Sécession de Mariposa — bundle prêt</li>
+        <li>[—] Fusion Flea — certificat en préparation</li>
+        <li>[—] Nuka Girl — tirage en cours</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- JS général + jukebox -->
+<script src="script.js"></script>
+<script src="jukebox.js"></script>
 </body>
 </html>
